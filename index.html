@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Page Numberer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
     
@@ -13,43 +18,48 @@
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            background-color: #f7f2fa; /* Material 3 Light Surface Variant */
-            color: #1d1b20; /* Material 3 On Surface */
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#141218] text-[#e6e1e5] dark:bg-[#141218] dark:text-[#e6e1e5] light:bg-[#f7f2fa] light:text-[#1d1b20]">
 
-    <div class="w-full max-w-xl bg-[#fffbfe] rounded-[28px] p-6 sm:p-8 shadow-md border border-[#e7e0ec]">
+    <div id="main-card" class="w-full max-w-xl rounded-[28px] p-6 sm:p-8 shadow-md border transition-all bg-[#25232a] border-[#49454f] dark:bg-[#25232a] dark:border-[#49454f]">
         
-        <div class="flex items-center gap-3 mb-6">
-            <span class="material-symbols-outlined text-[#6750a4] text-3xl">picture_as_pdf</span>
-            <div>
-                <h1 class="text-2xl font-semibold tracking-tight text-[#1d1b20]">PDF Page Numberer</h1>
-                <p class="text-sm text-[#49454f]">Add local typography page numbers to your document.</p>
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#d0bcff] dark:text-[#d0bcff] light:text-[#6750a4] text-3xl">picture_as_pdf</span>
+                <div>
+                    <h1 class="text-2xl font-semibold tracking-tight">PDF Numberer</h1>
+                    <p id="sub-text" class="text-sm text-[#cac4d0]">Stamp layout numbers onto your document.</p>
+                </div>
             </div>
+            
+            <button id="theme-toggle" class="p-3 rounded-full hover:bg-[#49454f] transition-colors flex items-center justify-center text-[#d0bcff]">
+                <span id="theme-icon" class="material-symbols-outlined">light_mode</span>
+            </button>
         </div>
 
-        <hr class="border-[#e7e0ec] mb-6">
+        <hr id="divider" class="border-[#49454f] mb-6">
 
         <div class="space-y-6">
             
             <div>
-                <label class="block text-sm font-medium text-[#49454f] mb-2">Select PDF File</label>
-                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#79747e] rounded-xl cursor-pointer bg-[#f7f2fa] hover:bg-[#e8def8] transition-colors group">
+                <label id="label-file" class="block text-sm font-medium text-[#cac4d0] mb-2">Select PDF File</label>
+                <label id="dropzone" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors group bg-[#1d1b20] border-[#938f99] hover:bg-[#49454f]">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                        <span class="material-symbols-outlined text-[#49454f] group-hover:text-[#6750a4] mb-2 text-3xl">upload_file</span>
-                        <p id="file-name" class="text-sm text-[#49454f] font-medium truncate max-w-xs">Click to upload or drag & drop</p>
-                        <p class="text-xs text-[#49454f] mt-1">PDF files only</p>
+                        <span id="upload-icon" class="material-symbols-outlined text-[#cac4d0] mb-2 text-3xl">upload_file</span>
+                        <p id="file-name" class="text-sm font-medium truncate max-w-xs text-[#cac4d0]">Click to upload or drag & drop</p>
+                        <p id="file-desc" class="text-xs text-[#938f99] mt-1">PDF files only</p>
                     </div>
                     <input id="pdf-upload" type="file" accept="application/pdf" class="hidden" />
                 </label>
             </div>
 
             <div>
-                <label for="position" class="block text-sm font-medium text-[#49454f] mb-2">Number Position</label>
+                <label id="label-pos" class="block text-sm font-medium text-[#cac4d0] mb-2">Number Position</label>
                 <div class="relative">
-                    <select id="position" class="w-full bg-[#f7f2fa] border border-[#79747e] text-[#1d1b20] rounded-xl px-4 py-3 appearance-none focus:outline-none focus:border-[#6750a4] focus:ring-1 focus:ring-[#6750a4] transition-all">
+                    <select id="position" class="w-full rounded-xl px-4 py-3 appearance-none focus:outline-none focus:ring-1 transition-all bg-[#1d1b20] border border-[#938f99] focus:border-[#d0bcff] focus:ring-[#d0bcff]">
                         <option value="top-left">Top Left</option>
                         <option value="top-center">Top Center</option>
                         <option value="top-right">Top Right</option>
@@ -57,28 +67,28 @@
                         <option value="bottom-center" selected>Bottom Center</option>
                         <option value="bottom-right">Bottom Right</option>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#49454f]">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#cac4d0]">
                         <span class="material-symbols-outlined">arrow_drop_down</span>
                     </div>
                 </div>
             </div>
 
             <div>
-                <label for="font-family" class="block text-sm font-medium text-[#49454f] mb-2">Font Style</label>
+                <label id="label-font" class="block text-sm font-medium text-[#cac4d0] mb-2">Font Style</label>
                 <div class="relative">
-                    <select id="font-family" class="w-full bg-[#f7f2fa] border border-[#79747e] text-[#1d1b20] rounded-xl px-4 py-3 appearance-none focus:outline-none focus:border-[#6750a4] focus:ring-1 focus:ring-[#6750a4] transition-all">
+                    <select id="font-family" class="w-full rounded-xl px-4 py-3 appearance-none focus:outline-none focus:ring-1 transition-all bg-[#1d1b20] border border-[#938f99] focus:border-[#d0bcff] focus:ring-[#d0bcff]">
                         <option value="fonts/Calluna.ttf">Calluna</option>
                         <option value="fonts/Poppins.ttf" selected>Poppins</option>
                         <option value="fonts/GoogleSansFlex.ttf">Google Sans Flex</option>
                         <option value="fonts/Arial.ttf">Arial</option>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#49454f]">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#cac4d0]">
                         <span class="material-symbols-outlined">arrow_drop_down</span>
                     </div>
                 </div>
             </div>
 
-            <button id="process-btn" class="w-full bg-[#6750a4] hover:bg-[#533d8b] text-white font-medium py-3 px-6 rounded-full shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none" disabled>
+            <button id="process-btn" class="w-full font-medium py-3 px-6 rounded-full shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none bg-[#6750a4] hover:bg-[#533d8b] text-white" disabled>
                 <span class="material-symbols-outlined text-sm">auto_awesome</span>
                 <span id="btn-text">Process & Export PDF</span>
             </button>
@@ -93,9 +103,63 @@
         const btnText = document.getElementById('btn-text');
         const positionSelect = document.getElementById('position');
         const fontSelect = document.getElementById('font-family');
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
 
         let selectedFile = null;
 
+        // --- Theme Switch Engine (Dark Default) ---
+        themeToggle.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                // Switch to Light Mode
+                htmlElement.classList.remove('dark');
+                themeIcon.textContent = 'dark_mode';
+                applyLightMode();
+            } else {
+                // Switch to Dark Mode
+                htmlElement.classList.add('dark');
+                themeIcon.textContent = 'light_mode';
+                applyDarkMode();
+            }
+        });
+
+        function applyDarkMode() {
+            document.body.className = "min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#141218] text-[#e6e1e5]";
+            document.getElementById('main-card').className = "w-full max-w-xl rounded-[28px] p-6 sm:p-8 shadow-md border transition-all bg-[#25232a] border-[#49454f]";
+            document.getElementById('sub-text').className = "text-sm text-[#cac4d0]";
+            document.getElementById('divider').className = "border-[#49454f] mb-6";
+            themeToggle.className = "p-3 rounded-full hover:bg-[#49454f] transition-colors flex items-center justify-center text-[#d0bcff]";
+            
+            // Labels & Inputs
+            ['label-file', 'label-pos', 'label-font'].forEach(id => document.getElementById(id).className = "block text-sm font-medium text-[#cac4d0] mb-2");
+            document.getElementById('dropzone').className = "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors group bg-[#1d1b20] border-[#938f99] hover:bg-[#49454f]";
+            fileNameDisplay.className = "text-sm font-medium truncate max-w-xs text-[#cac4d0]";
+            document.getElementById('file-desc').className = "text-xs text-[#938f99] mt-1";
+            
+            [positionSelect, fontSelect].forEach(el => el.className = "w-full rounded-xl px-4 py-3 appearance-none focus:outline-none focus:ring-1 transition-all bg-[#1d1b20] border border-[#938f99] focus:border-[#d0bcff] focus:ring-[#d0bcff] text-white");
+        }
+
+        function applyLightMode() {
+            document.body.className = "min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#f7f2fa] text-[#1d1b20]";
+            document.getElementById('main-card').className = "w-full max-w-xl rounded-[28px] p-6 sm:p-8 shadow-md border transition-all bg-[#fffbfe] border-[#e7e0ec]";
+            document.getElementById('sub-text').className = "text-sm text-[#49454f]";
+            document.getElementById('divider').className = "border-[#e7e0ec] mb-6";
+            themeToggle.className = "p-3 rounded-full hover:bg-[#e8def8] transition-colors flex items-center justify-center text-[#6750a4]";
+            
+            // Labels & Inputs
+            ['label-file', 'label-pos', 'label-font'].forEach(id => document.getElementById(id).className = "block text-sm font-medium text-[#49454f] mb-2");
+            document.getElementById('dropzone').className = "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors group bg-[#f7f2fa] border-[#79747e] hover:bg-[#e8def8]";
+            fileNameDisplay.className = "text-sm font-medium truncate max-w-xs text-[#49454f]";
+            document.getElementById('file-desc').className = "text-xs text-[#49454f] mt-1";
+            
+            [positionSelect, fontSelect].forEach(el => el.className = "w-full rounded-xl px-4 py-3 appearance-none focus:outline-none focus:ring-1 transition-all bg-[#f7f2fa] border border-[#79747e] focus:border-[#6750a4] focus:ring-[#6750a4] text-[#1d1b20]");
+        }
+
+        // Initialize selectors with the correct theme color styles on build
+        applyDarkMode();
+
+        // --- File Selector Logic ---
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 selectedFile = e.target.files[0];
@@ -108,40 +172,40 @@
             }
         });
 
+        // --- PDF Rendering Pipeline ---
         processBtn.addEventListener('click', async () => {
             if (!selectedFile) return;
 
             processBtn.setAttribute('disabled', 'true');
-            btnText.textContent = "Loading Local Font & PDF Engine...";
+            btnText.textContent = "Compiling PDF Elements...";
 
             try {
-                // Read uploaded user PDF
                 const arrayBuffer = await selectedFile.arrayBuffer();
                 const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
                 
-                // Inject the font kit engine
                 pdfDoc.registerFontkit(fontkit);
 
-                // Fetch target local binary file path selected from drop-down menu
                 const fontPath = fontSelect.value;
                 const fontResponse = await fetch(fontPath);
                 
                 if (!fontResponse.ok) {
-                    throw new Error(`Failed to load font asset at ${fontPath}. Verify the file exists in your fonts folder.`);
+                    throw new Error(`Could not find your font at '${fontPath}'. Verify the file structure inside your fonts/ directory.`);
                 }
                 
                 const fontBytes = await fontResponse.arrayBuffer();
                 const pdfFont = await pdfDoc.embedFont(fontBytes);
 
                 const pages = pdfDoc.getPages();
-                const margin = 35; 
-                const fontSize = 11;
+                
+                // ADJUSTMENT: Set font size to 28 (Matching MS Word scale layout specifications)
+                const fontSize = 28;
+                // Give a bit more breathing room on page borders for the larger text sizes
+                const margin = 45; 
 
                 pages.forEach((page, index) => {
                     const { width, height } = page.getSize();
                     const pageNumString = String(index + 1);
                     
-                    // fontkit calculates geometric sizing details depending on vector data 
                     const textWidth = pdfFont.widthOfTextAtSize(pageNumString, fontSize);
                     
                     let x = width / 2 - textWidth / 2; 
@@ -157,7 +221,7 @@
                     }
 
                     if (pos.includes('top')) {
-                        y = height - margin;
+                        y = height - margin - (fontSize / 2);
                     } else if (pos.includes('bottom')) {
                         y = margin;
                     }
@@ -167,11 +231,11 @@
                         y: y,
                         size: fontSize,
                         font: pdfFont,
-                        color: PDFLib.rgb(0.29, 0.27, 0.31), // Material 3 On-Surface-Variant Tone
+                        // Clean charcoal color styling for printing visibility
+                        color: PDFLib.rgb(0.15, 0.15, 0.15), 
                     });
                 });
 
-                // Compile modifications and serve file payload string sequence
                 const pdfBytes = await pdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: "application/pdf" });
                 const link = document.createElement('a');
@@ -183,7 +247,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert(error.message || "An error occurred. Check browser development console log notes.");
+                alert(error.message || "An unexpected error occurred processing your file.");
             } finally {
                 processBtn.removeAttribute('disabled');
                 btnText.textContent = "Process & Export PDF";
